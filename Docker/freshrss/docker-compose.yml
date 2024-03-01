@@ -1,28 +1,29 @@
-version: "2.4"
-
+---
+version: "3"
+services:
+  freshrss:
+    image: lscr.io/linuxserver/freshrss:latest
+    container_name: freshrss
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - data:/path/to/data:/config
+    ports:
+      - 80:80
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.freshrss.rule=Host(`DOMAINNAME`)"
+      - "traefik.http.routers.freshrss.entrypoints=web"
 volumes:
   data:
-  extensions:
-
-services:
-
-  freshrss:
-    image: freshrss/freshrss:latest
-    # Optional build section if you want to build the image locally:
-    build:
-      # Pick #latest (stable release) or #edge (rolling release) or a specific release like #1.21.0
-      context: https://github.com/FreshRSS/FreshRSS.git#latest
-      dockerfile: Docker/Dockerfile-Alpine
-    container_name: freshrss
-    hostname: freshrss
-    restart: unless-stopped
-    logging:
-      options:
-        max-size: 10m
-    volumes:
-      - data:/var/www/FreshRSS/data
-      - extensions:/var/www/FreshRSS/extensions
-    environment:
-      TZ: Europe/Paris
-      CRON_MIN: '3,33'
-      TRUSTED_PROXY: 172.16.0.1/12 192.168.0.1/16
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.X,rw
+networks:
+  network1:
+    name: nfs_default
+    external: true
